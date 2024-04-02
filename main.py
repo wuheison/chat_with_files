@@ -39,44 +39,45 @@ uploaded_file = st.file_uploader("Upload a PDF or docx or html file", type=['pdf
 # Process the uploaded file
 if uploaded_file is not None and not st.session_state.pdf_processed:
         
-        file_type = uploaded_file.name.split('.')[-1]  # Get the file extension
-        with tempfile.NamedTemporaryFile(delete=False, suffix=f".{file_type}") as tmpfile:
-            tmpfile.write(uploaded_file.getvalue())
-            tmpfile_path = tmpfile.name
+        with st.spinner('Processing file...'):
+            file_type = uploaded_file.name.split('.')[-1]  # Get the file extension
+            with tempfile.NamedTemporaryFile(delete=False, suffix=f".{file_type}") as tmpfile:
+                tmpfile.write(uploaded_file.getvalue())
+                tmpfile_path = tmpfile.name
 
-        # Choose the appropriate loader based on the file type
-        if file_type == 'pdf':
-            loader = PyPDFLoader(tmpfile_path)
-        elif file_type == 'html':
-            loader = UnstructuredHTMLLoader(tmpfile_path)
-        elif file_type == 'docx':
-            loader = Docx2txtLoader(tmpfile_path)
-        else:
-            st.error("Unsupported file type")
-            st.stop()
+            # Choose the appropriate loader based on the file type
+            if file_type == 'pdf':
+                loader = PyPDFLoader(tmpfile_path)
+            elif file_type == 'html':
+                loader = UnstructuredHTMLLoader(tmpfile_path)
+            elif file_type == 'docx':
+                loader = Docx2txtLoader(tmpfile_path)
+            else:
+                st.error("Unsupported file type")
+                st.stop()
 
-        documents = loader.load()
-        text_splitter = RecursiveCharacterTextSplitter(chunk_size=1000, chunk_overlap=200)
-        texts = text_splitter.split_documents(documents)
+            documents = loader.load()
+            text_splitter = RecursiveCharacterTextSplitter(chunk_size=1000, chunk_overlap=200)
+            texts = text_splitter.split_documents(documents)
 
-        # Embeddings and vector database setup
-        embedding_model_name = "mixedbread-ai/mxbai-embed-large-v1"
-        embedding = HuggingFaceEmbeddings(model_name=embedding_model_name)
-        persist_directory = 'db'
-        vectordb = Chroma.from_documents(documents=texts, embedding=embedding, persist_directory=persist_directory)
-        retriever = vectordb.as_retriever()
+            # Embeddings and vector database setup
+            embedding_model_name = "mixedbread-ai/mxbai-embed-large-v1"
+            embedding = HuggingFaceEmbeddings(model_name=embedding_model_name)
+            persist_directory = 'db'
+            vectordb = Chroma.from_documents(documents=texts, embedding=embedding, persist_directory=persist_directory)
+            retriever = vectordb.as_retriever()
 
-        # Setup qa_chain with the updated retriever
-        repo_id = "mistralai/Mixtral-8x7B-Instruct-v0.1"
-        llm = HuggingFaceEndpoint(repo_id=repo_id, max_length=64, temperature=0.1, token=HUGGINGFACEHUB_API_TOKEN)
-        st.session_state.qa_chain = RetrievalQA.from_chain_type(llm=llm, chain_type="stuff", retriever=retriever)
-        
-        vectordb.persist()
+            # Setup qa_chain with the updated retriever
+            repo_id = "mistralai/Mixtral-8x7B-Instruct-v0.1"
+            llm = HuggingFaceEndpoint(repo_id=repo_id, max_length=64, temperature=0.1, token=HUGGINGFACEHUB_API_TOKEN)
+            st.session_state.qa_chain = RetrievalQA.from_chain_type(llm=llm, chain_type="stuff", retriever=retriever)
+            
+            vectordb.persist()
 
-        # Cleanup temporary file
-        os.unlink(tmpfile_path)
-        st.session_state.pdf_processed = True
-        st.success('File processed and stored successfully!')
+            # Cleanup temporary file
+            os.unlink(tmpfile_path)
+            st.session_state.pdf_processed = True
+            st.success('File processed and stored successfully!')
 
 
 # Initialize chat history
