@@ -3,15 +3,14 @@ import tempfile
 from dotenv import load_dotenv
 import streamlit as st
 from langchain_community.vectorstores import Chroma
-from langchain.chains import LLMChain, RetrievalQA
+from langchain.chains import RetrievalQA
 from langchain_community.llms import HuggingFaceEndpoint
-from langchain_community.document_loaders import PyPDFLoader
+from langchain_community.document_loaders import PyPDFLoader, UnstructuredHTMLLoader, Docx2txtLoader
 from langchain.prompts import PromptTemplate 
 from langchain.text_splitter import RecursiveCharacterTextSplitter
 from langchain_community.embeddings import HuggingFaceEmbeddings
-import torch
 
-print(f'cuda enabled?{torch.cuda.is_available()}')
+
 # Load environment variables
 load_dotenv()
 HUGGINGFACEHUB_API_TOKEN = os.getenv('HUGGINGFACEHUB_API_TOKEN')
@@ -35,17 +34,27 @@ if "qa_chain" not in st.session_state:
     st.session_state.qa_chain = None
 
 # File uploader for PDFs
-uploaded_file = st.file_uploader("Upload a PDF file", type=['pdf'])
+uploaded_file = st.file_uploader("Upload a PDF or docx or html file", type=['pdf','html','docx'])
 
-# Process the uploaded PDF file
+# Process the uploaded file
 if uploaded_file is not None and not st.session_state.pdf_processed:
-    with st.spinner('Processing the PDF file...'):
-        with tempfile.NamedTemporaryFile(delete=False, suffix=".pdf") as tmpfile:
+        
+        file_type = uploaded_file.name.split('.')[-1]  # Get the file extension
+        with tempfile.NamedTemporaryFile(delete=False, suffix=f".{file_type}") as tmpfile:
             tmpfile.write(uploaded_file.getvalue())
             tmpfile_path = tmpfile.name
 
-        # Document loading and text processing
-        loader = PyPDFLoader(tmpfile_path)
+        # Choose the appropriate loader based on the file type
+        if file_type == 'pdf':
+            loader = PyPDFLoader(tmpfile_path)
+        elif file_type == 'html':
+            loader = UnstructuredHTMLLoader(tmpfile_path)
+        elif file_type == 'docx':
+            loader = Docx2txtLoader(tmpfile_path)
+        else:
+            st.error("Unsupported file type")
+            st.stop()
+
         documents = loader.load()
         text_splitter = RecursiveCharacterTextSplitter(chunk_size=1000, chunk_overlap=200)
         texts = text_splitter.split_documents(documents)
@@ -67,7 +76,7 @@ if uploaded_file is not None and not st.session_state.pdf_processed:
         # Cleanup temporary file
         os.unlink(tmpfile_path)
         st.session_state.pdf_processed = True
-        st.success('PDF file processed and stored successfully!')
+        st.success('File processed and stored successfully!')
 
 
 # Initialize chat history
