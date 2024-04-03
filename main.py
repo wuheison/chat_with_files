@@ -5,7 +5,7 @@ import streamlit as st
 from langchain_community.vectorstores import Chroma
 from langchain.chains import RetrievalQA
 from langchain_community.llms import HuggingFaceEndpoint
-from langchain_community.document_loaders import PyPDFLoader, UnstructuredHTMLLoader, Docx2txtLoader
+from langchain_community.document_loaders import PyPDFLoader, Docx2txtLoader
 from langchain.prompts import PromptTemplate 
 from langchain.text_splitter import RecursiveCharacterTextSplitter
 from langchain_community.embeddings import HuggingFaceEmbeddings
@@ -56,7 +56,7 @@ st.title('AI Chat with your Files')
 
 # Description for users with Markdown for styling
 st.markdown("""
-## Use AI to Chat with your **PDF**, **Word**, or **HTML**
+## Use AI to Chat with your **PDF**, **Word**
 """)
 
 # Using columns for layout
@@ -81,7 +81,7 @@ if "qa_chain" not in st.session_state:
     st.session_state.qa_chain = None
 
 # File uploader for PDFs
-uploaded_file = st.file_uploader("Upload a PDF or Word or html file", type=['pdf','docx','html'])
+uploaded_file = st.file_uploader("Upload a PDF or Word file", type=['pdf','docx'])
 
 # Process the uploaded file
 if uploaded_file is not None and not st.session_state.pdf_processed:
@@ -95,8 +95,6 @@ if uploaded_file is not None and not st.session_state.pdf_processed:
             # Choose the appropriate loader based on the file type
             if file_type == 'pdf':
                 loader = PyPDFLoader(tmpfile_path)
-            elif file_type == 'html':
-                loader = UnstructuredHTMLLoader(tmpfile_path)
             elif file_type == 'docx':
                 loader = Docx2txtLoader(tmpfile_path)
             else:
