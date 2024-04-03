@@ -9,11 +9,38 @@ from langchain_community.document_loaders import PyPDFLoader, UnstructuredHTMLLo
 from langchain.prompts import PromptTemplate 
 from langchain.text_splitter import RecursiveCharacterTextSplitter
 from langchain_community.embeddings import HuggingFaceEmbeddings
+import boto3
+from botocore.exceptions import ClientError
+import json
+
+# for aws secrete manager on ec2
+def get_aws_secret():
+    secret_name = "API_tokens"
+    region_name = "ap-southeast-1"
+
+    session = boto3.session.Session()
+    client = session.client(service_name='secretsmanager', region_name=region_name)
+    try:
+        get_secret_value_response = client.get_secret_value(
+            SecretId=secret_name
+        )
+    except ClientError as e:
+        # For a list of exceptions thrown, see
+        # https://docs.aws.amazon.com/secretsmanager/latest/apireference/API_GetSecretValue.html
+        raise e
+    
+    secret_string = get_secret_value_response['SecretString']
+    secret_dict = json.loads(secret_string)
+    api_key = secret_dict['HUGGINGFACEHUB_API_TOKEN']
+    return api_key
 
 
-# Load environment variables
-load_dotenv()
-HUGGINGFACEHUB_API_TOKEN = os.getenv('HUGGINGFACEHUB_API_TOKEN')
+# Check if running in production
+if os.getenv('ENVIRONMENT') == 'production':
+    HUGGINGFACEHUB_API_TOKEN = get_aws_secret()
+else:
+    load_dotenv()  # Load environment variables from .env file for development
+    HUGGINGFACEHUB_API_TOKEN = os.getenv('HUGGINGFACEHUB_API_TOKEN')
 
 # question template
 template = """Question: {question}
@@ -24,9 +51,29 @@ question = PromptTemplate(template=template, input_variables=["question"])
 
 
 # Streamlit UI setup
-st.set_page_config(page_title='Chat with Files')
-st.title('Chat with Files')
+st.set_page_config(page_title='AI Chat with your Files')
+st.title('AI Chat with your Files')
 
+# Description for users with Markdown for styling
+st.markdown("""
+## Use AI to Chat with your **PDF**, **Word**, or **HTML**
+""")
+
+# Using columns for layout
+col1, col2 = st.columns(2)
+
+with col1:
+    st.image("asset/logo.jpg")
+
+with col2:
+    st.markdown("""
+    ### Instructions:
+    1. **Drag and drop** or Click on the **Browse files** button below.
+    2. **Wait** for processing.
+    3. Type your **question** in the chat input.
+    4. Get **answers** based on your file's content.
+    5. **Refresh** to restart
+    """)
 # Initialize session state variables if they don't exist
 if "pdf_processed" not in st.session_state:
     st.session_state.pdf_processed = False
@@ -34,7 +81,7 @@ if "qa_chain" not in st.session_state:
     st.session_state.qa_chain = None
 
 # File uploader for PDFs
-uploaded_file = st.file_uploader("Upload a PDF or docx or html file", type=['pdf','html','docx'])
+uploaded_file = st.file_uploader("Upload a PDF or Word or html file", type=['pdf','docx','html'])
 
 # Process the uploaded file
 if uploaded_file is not None and not st.session_state.pdf_processed:
