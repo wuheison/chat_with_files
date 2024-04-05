@@ -32,7 +32,6 @@ def get_aws_secret():
     secret_string = get_secret_value_response['SecretString']
     secret_dict = json.loads(secret_string)
     api_key = secret_dict['HUGGINGFACEHUB_API_TOKEN']
-    print(f'api key is {api_key}')
     return api_key
 
 
