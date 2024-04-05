@@ -35,8 +35,7 @@ def get_aws_secret():
     return api_key
 
 
-HUGGINGFACEHUB_API_TOKEN = get_aws_secret()
-
+HUGGINGFACEHUB_API_TOKEN = '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'
 
 # question template
 template = """Question: {question}
