@@ -35,6 +35,7 @@ def get_aws_secret():
     return api_key
 
 
+# HUGGINGFACEHUB_API_TOKEN = get_aws_secret()
 HUGGINGFACEHUB_API_TOKEN = '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'
 
 # question template
@@ -83,7 +84,7 @@ uploaded_file = st.file_uploader("Upload a PDF or Word file", type=['pdf','docx'
 # Process the uploaded file
 if uploaded_file is not None and not st.session_state.pdf_processed:
         
-        with st.spinner(f'Processing file...{HUGGINGFACEHUB_API_TOKEN}'):
+        with st.spinner(f'Processing file...'):
             file_type = uploaded_file.name.split('.')[-1]  # Get the file extension
             with tempfile.NamedTemporaryFile(delete=False, suffix=f".{file_type}") as tmpfile:
                 tmpfile.write(uploaded_file.getvalue())
