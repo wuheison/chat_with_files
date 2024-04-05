@@ -36,12 +36,8 @@ def get_aws_secret():
     return api_key
 
 
-# Check if running in production
-if os.getenv('ENVIRONMENT') == 'production':
-    HUGGINGFACEHUB_API_TOKEN = get_aws_secret()
-else:
-    load_dotenv()  # Load environment variables from .env file for development
-    HUGGINGFACEHUB_API_TOKEN = os.getenv('HUGGINGFACEHUB_API_TOKEN')
+HUGGINGFACEHUB_API_TOKEN = get_aws_secret()
+
 
 # question template
 template = """Question: {question}
