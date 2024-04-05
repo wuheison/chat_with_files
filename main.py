@@ -32,6 +32,7 @@ def get_aws_secret():
     secret_string = get_secret_value_response['SecretString']
     secret_dict = json.loads(secret_string)
     api_key = secret_dict['HUGGINGFACEHUB_API_TOKEN']
+    print(f'api key is {api_key}')
     return api_key
 
 
@@ -45,7 +46,9 @@ else:
 # question template
 template = """Question: {question}
 
-Answer: Let's think step by step."""
+Answer: Let's think step by step. 
+Find the answer only from the retriever.
+If you cannot find or don't know the answer, do not guess, just say you cannot find the answer."""
 
 question = PromptTemplate(template=template, input_variables=["question"])
 
