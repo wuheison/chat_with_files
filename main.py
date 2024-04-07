@@ -9,33 +9,35 @@ from langchain_community.document_loaders import PyPDFLoader, Docx2txtLoader
 from langchain.prompts import PromptTemplate 
 from langchain.text_splitter import RecursiveCharacterTextSplitter
 from langchain_community.embeddings import HuggingFaceEmbeddings
-import boto3
-from botocore.exceptions import ClientError
-import json
+#import boto3
+#from botocore.exceptions import ClientError
+#import json
+
 
 # for aws secrete manager on ec2
-def get_aws_secret():
-    secret_name = "API_tokens"
-    region_name = "ap-southeast-1"
+#def get_aws_secret():
+    #secret_name = "API_tokens"
+    #region_name = "ap-southeast-1"
 
-    session = boto3.session.Session()
-    client = session.client(service_name='secretsmanager', region_name=region_name)
-    try:
-        get_secret_value_response = client.get_secret_value(
-            SecretId=secret_name
-        )
-    except ClientError as e:
-        # For a list of exceptions thrown, see
+    ##session = boto3.session.Session()
+    #client = session.client(service_name='secretsmanager', region_name=region_name)
+    #try:
+    #    get_secret_value_response = client.get_secret_value(
+    #        SecretId=secret_name
+    #    )
+    #except ClientError as e:
+    #    # For a list of exceptions thrown, see
         # https://docs.aws.amazon.com/secretsmanager/latest/apireference/API_GetSecretValue.html
-        raise e
+    #    raise e
     
-    secret_string = get_secret_value_response['SecretString']
-    secret_dict = json.loads(secret_string)
-    api_key = secret_dict['HUGGINGFACEHUB_API_TOKEN']
-    return api_key
+    #secret_string = get_secret_value_response['SecretString']
+    #secret_dict = json.loads(secret_string)
+    #api_key = secret_dict['HUGGINGFACEHUB_API_TOKEN']
+    #return api_key
 
 
-HUGGINGFACEHUB_API_TOKEN = get_aws_secret()
+#HUGGINGFACEHUB_API_TOKEN = get_aws_secret()
+HUGGINGFACEHUB_API_TOKEN = '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'
 
 
 # question template
