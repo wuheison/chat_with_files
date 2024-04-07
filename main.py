@@ -12,8 +12,6 @@ from langchain_community.embeddings import HuggingFaceEmbeddings
 import boto3
 from botocore.exceptions import ClientError
 import json
-import shutil
-import time
 
 # for aws secrete manager on ec2
 def get_aws_secret():
@@ -37,8 +35,8 @@ def get_aws_secret():
     return api_key
 
 
-# HUGGINGFACEHUB_API_TOKEN = get_aws_secret()
-HUGGINGFACEHUB_API_TOKEN = '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'
+HUGGINGFACEHUB_API_TOKEN = get_aws_secret()
+
 
 # question template
 template = """Question: {question}
@@ -76,6 +74,7 @@ with col2:
     3. Type your **question** in the chat input.
     4. Get **answers** based on your file's content.
     5. **Refresh** to restart
+    . key is {HUGGINGFACEHUB_API_TOKEN}
     """)
 # Initialize session state variables if they don't exist
 if "pdf_processed" not in st.session_state:
@@ -118,8 +117,8 @@ if uploaded_file is not None and not st.session_state.pdf_processed:
 
             # Setup qa_chain with the updated retriever
             repo_id = "mistralai/Mixtral-8x7B-Instruct-v0.1"
-            llm = HuggingFaceEndpoint(repo_id=repo_id, max_length=64, temperature=0.1, token="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")
-            st.session_state.qa_chain = RetrievalQA.from_chain_type(llm=llm, chain_type="stuff", retriever=retriever)
+            llm = HuggingFaceEndpoint(repo_id=repo_id, max_length=64, temperature=0.1, token=HUGGINGFACEHUB_API_TOKEN)
+            st.session_state.qa_chain = RetrievalQA.from_chain_type(llm=local_llm, chain_type="stuff", retriever=retriever)
             
             vectordb.persist()
 
