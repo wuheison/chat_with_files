@@ -76,7 +76,6 @@ with col2:
     3. Type your **question** in the chat input.
     4. Get **answers** based on your file's content.
     5. **Refresh** to restart
-    The key is {HUGGINGFACEHUB_API_TOKEN}
     """)
 # Initialize session state variables if they don't exist
 if "pdf_processed" not in st.session_state:
@@ -119,7 +118,7 @@ if uploaded_file is not None and not st.session_state.pdf_processed:
 
             # Setup qa_chain with the updated retriever
             repo_id = "mistralai/Mixtral-8x7B-Instruct-v0.1"
-            llm = HuggingFaceEndpoint(repo_id=repo_id, max_length=64, temperature=0.1, token=HUGGINGFACEHUB_API_TOKEN)
+            llm = HuggingFaceEndpoint(repo_id=repo_id, max_length=64, temperature=0.1, token="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")
             st.session_state.qa_chain = RetrievalQA.from_chain_type(llm=llm, chain_type="stuff", retriever=retriever)
             
             vectordb.persist()
