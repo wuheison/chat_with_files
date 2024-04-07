@@ -35,9 +35,10 @@ from langchain_community.embeddings import HuggingFaceEmbeddings
     #api_key = secret_dict['HUGGINGFACEHUB_API_TOKEN']
     #return api_key
 
-
+# uncommnet if use AWS secrete
 #HUGGINGFACEHUB_API_TOKEN = get_aws_secret()
-HUGGINGFACEHUB_API_TOKEN = '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'
+load_dotenv()
+HUGGINGFACEHUB_API_TOKEN = os.getenv('HUGGINGFACEHUB_API_TOKEN')
 
 
 # question template
@@ -75,8 +76,7 @@ with col2:
     2. **Wait** for processing.
     3. Type your **question** in the chat input.
     4. Get **answers** based on your file's content.
-    5. **Refresh** to restart
-    . key is {HUGGINGFACEHUB_API_TOKEN}
+    5. **Refresh** to restart.
     """)
 # Initialize session state variables if they don't exist
 if "pdf_processed" not in st.session_state:
