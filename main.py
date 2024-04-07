@@ -12,6 +12,8 @@ from langchain_community.embeddings import HuggingFaceEmbeddings
 import boto3
 from botocore.exceptions import ClientError
 import json
+import shutil
+import time
 
 # for aws secrete manager on ec2
 def get_aws_secret():
@@ -42,7 +44,10 @@ HUGGINGFACEHUB_API_TOKEN = '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'
 template = """Question: {question}
 
 Answer: Let's think step by step. 
-Find the answer only from the retriever.
+You are the brain of a Retrieval-Augmented Generation,
+user will upload a pdf or Word file and ask you question about it.
+Find the answer only from the retriever which is from the file.
+Do not answer anything outside the scope of this file
 If you cannot find or don't know the answer, do not guess, just say you cannot find the answer."""
 
 question = PromptTemplate(template=template, input_variables=["question"])
@@ -64,13 +69,14 @@ with col1:
     st.image("asset/logo.jpg")
 
 with col2:
-    st.markdown("""
+    st.markdown(f"""
     ### Instructions:
     1. **Drag and drop** or Click on the **Browse files** button below.
     2. **Wait** for processing.
     3. Type your **question** in the chat input.
     4. Get **answers** based on your file's content.
     5. **Refresh** to restart
+    The key is {HUGGINGFACEHUB_API_TOKEN}
     """)
 # Initialize session state variables if they don't exist
 if "pdf_processed" not in st.session_state:
@@ -83,6 +89,7 @@ uploaded_file = st.file_uploader("Upload a PDF or Word file", type=['pdf','docx'
 
 # Process the uploaded file
 if uploaded_file is not None and not st.session_state.pdf_processed:
+        
         
         with st.spinner(f'Processing file...'):
             file_type = uploaded_file.name.split('.')[-1]  # Get the file extension
