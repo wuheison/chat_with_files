@@ -53,7 +53,7 @@ If you prefer to use AWS Secrets Manager to manage your API tokens securely, esp
 
 To start the Streamlit application, run the following command in your terminal:
 
-bash streamlit run main.py
+streamlit run main.py
 
 
 ### How to Use the Application
