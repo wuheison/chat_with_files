@@ -14,7 +14,7 @@ This Streamlit application allows users to upload PDF or Word files and interact
 To run this application, you need Python installed on your system. Follow these steps to set up the project:
 
 1. Clone the repository:
-git clone [https://github.com/yourusername/your-repo-name.git](https://github.com/wuheison/chat_with_files.git)
+git clone https://github.com/wuheison/chat_with_files.git
 2. Create and activate a virtual environment (optional but recommended):
 python -m venv venv
 
